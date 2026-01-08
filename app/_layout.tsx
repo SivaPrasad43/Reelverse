@@ -10,13 +10,34 @@ import "../global.css";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { persistor, store } from "@/store";
+import { checkAuthStatus } from "@/store/slices/authSlice";
 import { ActivityIndicator, View } from "react-native";
-import { Provider } from "react-redux";
+import { useEffect } from "react";
+import { Provider, useDispatch } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 
-export default function RootLayout() {
+function AppContent() {
   const colorScheme = useColorScheme();
+  const dispatch = useDispatch();
 
+  useEffect(() => {
+    // Check for existing Supabase session on app startup
+    dispatch(checkAuthStatus() as any);
+  }, []);
+
+  return (
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(tabs)" />
+      </Stack>
+      <StatusBar style="auto" />
+    </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
   return (
     <Provider store={store}>
       <PersistGate
@@ -29,16 +50,7 @@ export default function RootLayout() {
         }
         persistor={persistor}
       >
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(tabs)" />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
+        <AppContent />
       </PersistGate>
     </Provider>
   );

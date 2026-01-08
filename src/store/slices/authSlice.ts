@@ -52,19 +52,33 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-export const logoutUser = createAsyncThunk("auth/logout", async () => {
-  await AsyncStorage.removeItem("authToken");
-});
+export const logoutUser = createAsyncThunk(
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      await authAPI.logout();
+      await AsyncStorage.removeItem("authToken"); // Clean up local storage
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Logout failed");
+    }
+  }
+);
 
 export const checkAuthStatus = createAsyncThunk(
   "auth/checkStatus",
-  async () => {
-    const token = await AsyncStorage.getItem("authToken");
-    if (token) {
-      // Optionally verify token with backend
-      return { token };
+  async (_, { rejectWithValue }) => {
+    try {
+      const user = await authAPI.getCurrentUser();
+      if (user) {
+        return {
+          user,
+          token: "supabase_session", // Supabase manages sessions internally
+        };
+      }
+      return null;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Session check failed");
     }
-    return null;
   }
 );
 
@@ -116,19 +130,39 @@ const authSlice = createSlice({
       });
 
     // Logout
-    builder.addCase(logoutUser.fulfilled, (state) => {
-      state.user = null;
-      state.token = null;
-      state.isAuthenticated = false;
-    });
+    builder
+      .addCase(logoutUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.isLoading = false;
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
 
     // Check auth status
-    builder.addCase(checkAuthStatus.fulfilled, (state, action) => {
-      if (action.payload) {
-        state.token = action.payload.token;
-        state.isAuthenticated = true;
-      }
-    });
+    builder
+      .addCase(checkAuthStatus.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(checkAuthStatus.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (action.payload) {
+          state.user = action.payload.user;
+          state.token = action.payload.token;
+          state.isAuthenticated = true;
+        }
+      })
+      .addCase(checkAuthStatus.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+        state.isAuthenticated = false;
+      });
   },
 });
 
