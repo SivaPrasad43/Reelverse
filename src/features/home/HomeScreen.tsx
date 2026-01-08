@@ -1,9 +1,11 @@
 import { useAppDispatch, useAppSelector } from "@/store";
 import { fetchCourses } from "@/store/slices/courseSlice";
+import { logoutUser } from "@/store/slices/authSlice";
 import { commonStyles, theme } from "@/styles";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -63,7 +65,25 @@ export default function HomeScreen() {
           </Text>
         </View>
         {/* logout button */}
-        <TouchableOpacity onPress={() => router.push("/(auth)/login" as any)}>
+        <TouchableOpacity
+          onPress={() => {
+            Alert.alert(
+              "Logout",
+              "Are you sure you want to logout?",
+              [
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Logout",
+                  style: "destructive",
+                  onPress: async () => {
+                    await dispatch(logoutUser()).unwrap();
+                    router.push("/(auth)/login");
+                  }
+                }
+              ]
+            );
+          }}
+        >
           <Text style={{ color: theme.colors.primary.contrast }}>Logout</Text>
         </TouchableOpacity>
       </View>

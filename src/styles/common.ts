@@ -98,7 +98,7 @@ export const commonStyles = StyleSheet.create({
   // Input styles
   input: {
     borderWidth: 1,
-    borderColor: theme.colors.border.main,
+    borderColor: theme.colors.border,
     borderRadius: theme.borderRadius.md,
     paddingVertical: theme.spacing.md,
     paddingHorizontal: theme.spacing.md,
@@ -154,7 +154,7 @@ export const commonStyles = StyleSheet.create({
   // Divider
   divider: {
     height: 1,
-    backgroundColor: theme.colors.border.main,
+    backgroundColor: theme.colors.border,
     marginVertical: theme.spacing.md,
   },
 

@@ -55,11 +55,9 @@ export const theme = {
       dark: "#2563EB",
     },
     // Borders
-    border: {
-      main: "#E5E7EB",
-      light: "#F3F4F6",
-      dark: "#D1D5DB",
-    },
+    border: "#E5E7EB",
+    borderLight: "#F3F4F6",
+    borderDark: "#D1D5DB",
   },
 
   // Dark mode colors
@@ -112,11 +110,9 @@ export const theme = {
       light: "#93C5FD",
       dark: "#3B82F6",
     },
-    border: {
-      main: "#374151",
-      light: "#4B5563",
-      dark: "#1F2937",
-    },
+    border: "#374151",
+    borderLight: "#4B5563",
+    borderDark: "#1F2937",
   },
 
   // Typography

@@ -121,9 +121,11 @@ const courseSlice = createSlice({
         state.error = action.payload as string;
       });
 
-    // Enroll course
+    // Enroll course - This is handled by the API call directly
+    // The API returns void, so we don't need to push to state here
+    // The course will be loaded when the user navigates to My Courses
     builder.addCase(enrollCourse.fulfilled, (state, action) => {
-      state.enrolledCourses.push(action.payload);
+      // The course will be loaded when fetchEnrolledCourses is called
     });
   },
 });

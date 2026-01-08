@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: theme.colors.border.main,
+    backgroundColor: theme.colors.border,
   },
   dividerText: {
     marginHorizontal: theme.spacing.md,
