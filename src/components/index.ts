@@ -1,5 +1,4 @@
-// Main component barrel export
-export * from "./common";
-export * from "./course";
-export * from "./quiz";
-export * from "./ui";
+export * from "./HapticTab";
+export * from "./IconSymbol";
+// export * from "./IconSymbol.ios";
+

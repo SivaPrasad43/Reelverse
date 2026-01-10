@@ -9,40 +9,76 @@ npm install
 npm start
 ```
 
-## 📖 Documentation
+## 🏗️ Architecture Overview
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for complete architecture documentation.
+The project follows a **Feature-Based Architecture** designed for scalability and maintainability.
 
-## 🏗️ Project Structure
+### 📂 Directory Structure
 
 ```
 src/
-├── api/           # API layer with axios interceptors
-├── store/         # Redux Toolkit store & slices
-├── features/      # Feature-based screens & components
-├── shared/        # Reusable components & utilities
-├── styles/        # Global theme & styles
-├── types/         # TypeScript type definitions
-└── hooks/         # Custom React hooks
+├── app/                 # 🚦 Expo Router (File-based routing)
+│   ├── (auth)/          # Authentication routes
+│   ├── (tabs)/          # Main tab navigation
+│   └── _layout.tsx      # Root layout & providers
+├── components/          # 🧩 Shared global UI components
+│   ├── HapticTab.tsx
+│   ├── IconSymbol.tsx
+│   └── index.ts
+├── features/            # 📦 Feature modules (Business Logic + UI)
+│   ├── auth/            # Authentication feature
+│   ├── checkout/        # Payment & Checkout
+│   ├── courses/         # Course browsing & details
+│   ├── home/            # Landing & Home screens
+│   ├── profile/         # User profile management
+│   └── ...
+└── shared/              # 🛠️ Shared utilities & Core Infrastructure
+    ├── api/             # API client & Supabase config
+    ├── constants/       # App constants (Theme, Colors)
+    ├── hooks/           # Custom reusable hooks
+    ├── store/           # Redux implementation
+    ├── styles/          # Global styles & Theme
+    └── utils/           # Helper functions
 ```
 
-## 🎯 Key Features
+### 🏛️ Core Architectural Concepts
 
-- ✅ Redux Toolkit for state management
-- ✅ Centralized API layer with interceptors
-- ✅ Feature-based architecture
-- ✅ Type-safe with TypeScript
-- ✅ Global theming system
-- ✅ Offline support with Redux Persist
+#### 1. Feature-First Separation
+Instead of grouping by file type (e.g., `screens/`, `components/`), we group by **feature domain**.
+- Each folder in `src/features/` represents a distinct business domain (e.g., `auth`, `courses`).
+- A feature folder typically contains its own `screens/`, `components/`, and feature-specific logic.
 
-## 🔧 Tech Stack
+#### 2. Shared Core (`src/shared`)
+Code used across multiple features lives here.
+- **State Management**: Redux Toolkit is configured in `src/shared/store`.
+- **API Layer**: Centralized Supabase client and API utilities.
+- **Theming**: Unified theme constants in `src/shared/constants`.
 
-- React Native + Expo
-- TypeScript
-- Redux Toolkit
-- Axios
-- Expo Router
+#### 3. Routing (`src/app`)
+We use **Expo Router** for file-based routing.
+- The `app/` directory mirrors the navigation structure.
+- Routes delegate logic to feature screens immediately (e.g., `app/(auth)/login.tsx` imports from `features/auth/screens/login-screen.tsx`).
+- This keeps the routing layer thin and purely focused on navigation configuration.
 
----
+## �️ Tech Stack
 
-For detailed architecture, best practices, and development workflow, see [ARCHITECTURE.md](./ARCHITECTURE.md)
+- **Framework**: React Native + Expo
+- **Language**: TypeScript
+- **State Management**: Redux Toolkit & usage with `useAppSelector` / `useAppDispatch`
+- **Navigation**: Expo Router (File-based)
+- **Backend / Auth**: Supabase
+- **Styling**: NativeWind (Tailwind CSS) / StyleSheet
+
+## 📝 Best Practices
+
+1. **Naming Convention**: Use `kebab-case` for file names (e.g., `login-screen.tsx`, `course-card.tsx`).
+2. **Imports**: Use absolute imports via the `@/` alias (e.g., `@/shared/components`).
+3. **Component Colocation**: Keep components close to where they are used. If reused globally, move to `src/components`.
+
+## Key Features
+
+- ✅ **Authentication**: Secure login/signup via Supabase.
+- ✅ **Course Management**: Browns, view details, and track progress.
+- ✅ **Video Player**: Integrated video learning experience.
+- ✅ **Quizzes**: Interactive quiz feature for courses.
+- ✅ **Offline Support**: Redux Persist for caching state.
