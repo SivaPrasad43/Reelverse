@@ -97,7 +97,7 @@ export default function CourseDetailPage() {
   if (isLoading || !currentCourse) {
     return (
       <View style={commonStyles.containerCentered}>
-        <ActivityIndicator size="large" color={theme.colors.primary.main} />
+        <ActivityIndicator size="large" color="#000000" />
       </View>
     );
   }

@@ -15,6 +15,7 @@ export const commonStyles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#FFFFFF",
   },
 
   // Flexbox utilities
@@ -72,25 +73,27 @@ export const commonStyles = StyleSheet.create({
     borderColor: theme.colors.primary.main,
   },
 
-  // Text styles
-  textPrimary: {
-    color: theme.colors.text.primary,
-    fontSize: theme.typography.fontSize.base,
-  },
-  textSecondary: {
-    color: theme.colors.text.secondary,
-    fontSize: theme.typography.fontSize.sm,
-  },
-  textHeading: {
-    color: theme.colors.text.primary,
-    fontSize: theme.typography.fontSize["2xl"],
-    fontWeight: theme.typography.fontWeight.bold,
-  },
-  textSubheading: {
-    color: theme.colors.text.primary,
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.semibold,
-  },
+    // Text styles
+    textPrimary: {
+      color: theme.colors.text.primary,
+      fontSize: theme.typography.fontSize.base,
+      fontFamily: theme.typography.fontFamily.regular,
+    },
+    textSecondary: {
+      color: theme.colors.text.secondary,
+      fontSize: theme.typography.fontSize.sm,
+      fontFamily: theme.typography.fontFamily.regular,
+    },
+    textHeading: {
+      color: theme.colors.text.primary,
+      fontSize: theme.typography.fontSize["2xl"],
+      fontFamily: theme.typography.fontFamily.bold,
+    },
+    textSubheading: {
+      color: theme.colors.text.primary,
+      fontSize: theme.typography.fontSize.lg,
+      fontFamily: theme.typography.fontFamily.semiBold,
+    },
   textCenter: {
     textAlign: "center",
   },

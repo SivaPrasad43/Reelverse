@@ -73,7 +73,7 @@ export default function VideoPlayerPage() {
   if (loading) {
     return (
       <View style={commonStyles.containerCentered}>
-        <ActivityIndicator size="large" color={theme.colors.primary.main} />
+        <ActivityIndicator size="large" color="#000000" />
       </View>
     );
   }

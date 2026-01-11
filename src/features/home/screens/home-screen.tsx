@@ -6,15 +6,33 @@ import { commonStyles, theme } from "@/shared/styles";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+    Alert,
+    FlatList,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+    Image,
+    ScrollView,
+    Dimensions,
+  } from "react-native";
 import { mockCourses } from "@/shared/data/mockData";
+import { Ionicons } from "@expo/vector-icons";
+
+const { width } = Dimensions.get('window');
+
+const CATEGORIES = [
+  { id: '1', title: 'Live Class', icon: 'videocam', color: '#E0E7FF', iconColor: '#6366F1' },
+  { id: '2', title: 'Quizzes', icon: 'extension-puzzle', color: '#FEF3C7', iconColor: '#F59E0B' },
+  { id: '3', title: 'Materials', icon: 'document-text', color: '#D1FAE5', iconColor: '#10B981' },
+  { id: '4', title: 'Doubts', icon: 'chatbubbles', color: '#FCE7F3', iconColor: '#EC4899' },
+];
+
+const HERO_BANNERS = [
+  { id: '1', title: 'Master React Native', subtitle: 'Join the bootcamp today!', color: '#6366F1' },
+  { id: '2', title: 'Full Stack Development', subtitle: 'New course available', color: '#EC4899' },
+];
 
 export default function HomePage() {
   const router = useRouter();
@@ -24,83 +42,112 @@ export default function HomePage() {
   const [localCourses, setLocalCourses] = useState(mockCourses);
 
   useEffect(() => {
-    // Use mock data for now - uncomment when backend is ready
-    // dispatch(fetchCourses());
     setLocalCourses(mockCourses);
   }, [dispatch]);
 
   const loadCourses = () => {
-    // Use mock data for now
     setLocalCourses(mockCourses);
-    // dispatch(fetchCourses());
   };
+
+  const renderHeroSection = () => (
+    <ScrollView 
+      horizontal 
+      pagingEnabled 
+      showsHorizontalScrollIndicator={false}
+      style={styles.heroScroll}
+    >
+      {HERO_BANNERS.map((banner) => (
+        <View key={banner.id} style={[styles.heroCard, { backgroundColor: banner.color }]}>
+          <View style={styles.heroTextContainer}>
+            <Text style={styles.heroTitle}>{banner.title}</Text>
+            <Text style={styles.heroSubtitle}>{banner.subtitle}</Text>
+            <TouchableOpacity style={styles.heroButton}>
+              <Text style={styles.heroButtonText}>Enroll Now</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.heroImagePlaceholder}>
+             <Ionicons name="rocket" size={80} color="rgba(255,255,255,0.3)" />
+          </View>
+        </View>
+      ))}
+    </ScrollView>
+  );
+
+  const renderCategories = () => (
+    <View style={styles.categoriesContainer}>
+      {CATEGORIES.map((cat) => (
+        <TouchableOpacity key={cat.id} style={styles.categoryItem}>
+          <View style={[styles.categoryIcon, { backgroundColor: cat.color }]}>
+            <Ionicons name={cat.icon as any} size={24} color={cat.iconColor} />
+          </View>
+          <Text style={styles.categoryTitle}>{cat.title}</Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+
+  const renderHeader = () => (
+    <View style={styles.headerContainer}>
+      <View style={styles.topRow}>
+        <View style={styles.userInfo}>
+          <View style={styles.avatarPlaceholder}>
+             <Ionicons name="person" size={24} color={theme.colors.primary.main} />
+          </View>
+          <View>
+            <Text style={styles.welcomeText}>Welcome back,</Text>
+            <Text style={styles.userName}>{user?.name || 'Student'}</Text>
+          </View>
+        </View>
+        <TouchableOpacity style={styles.notificationBtn}>
+           <Ionicons name="notifications-outline" size={24} color="#000" />
+           <View style={styles.badge} />
+        </TouchableOpacity>
+      </View>
+
+      {renderHeroSection()}
+      {renderCategories()}
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Continue Learning</Text>
+        <TouchableOpacity>
+          <Text style={styles.seeAll}>See all</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   const renderCourseCard = ({ item }: any) => (
     <TouchableOpacity
       style={styles.courseCard}
       onPress={() => router.push(ROUTES.COURSE(item.id) as any)}
     >
-      <View style={styles.courseThumbnail}>
-        <Text style={styles.courseThumbnailText}>📚</Text>
+      <View style={[styles.courseImageContainer, { backgroundColor: theme.colors.pastel.lavender }]}>
+         <Ionicons name="play-circle" size={40} color={theme.colors.primary.main} />
       </View>
       <View style={styles.courseInfo}>
-        <Text style={styles.courseTitle}>{item.title}</Text>
-        <Text style={styles.courseInstructor}>{item.instructor}</Text>
-        <View style={commonStyles.rowBetween}>
-          <Text style={styles.coursePrice}>${item.price}</Text>
-          <Text style={styles.courseRating}>⭐ {item.rating}</Text>
+        <Text style={styles.courseTitle} numberOfLines={2}>{item.title}</Text>
+        <View style={styles.courseMeta}>
+          <Ionicons name="time-outline" size={14} color={theme.colors.text.secondary} />
+          <Text style={styles.courseDate}>26 Apr, 6:30pm</Text>
+        </View>
+        <View style={styles.progressBarContainer}>
+          <View style={[styles.progressBar, { width: '45%' }]} />
         </View>
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <View style={commonStyles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>
-            Hello, {user?.name || "Student"}! 👋
-          </Text>
-          <Text style={styles.subtitle}>
-            What would you like to learn today?
-          </Text>
-        </View>
-        {/* logout button */}
-        <TouchableOpacity
-          onPress={() => {
-            Alert.alert(
-              "Logout",
-              "Are you sure you want to logout?",
-              [
-                { text: "Cancel", style: "cancel" },
-                {
-                  text: "Logout",
-                  style: "destructive",
-                    onPress: async () => {
-                      await dispatch(logoutUser()).unwrap();
-                      router.replace(ROUTES.TABS.INDEX);
-                    }
-                }
-              ]
-            );
-          }}
-        >
-          <Text style={{ color: theme.colors.primary.contrast }}>Logout</Text>
-        </TouchableOpacity>
-      </View>
-
+    <View style={styles.safeArea}>
       <FlatList
         data={localCourses}
         renderItem={renderCourseCard}
         keyExtractor={(item) => item.id}
+        ListHeaderComponent={renderHeader()}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={false} onRefresh={loadCourses} />
-        }
-        ListEmptyComponent={
-          <View style={commonStyles.containerCentered}>
-            <Text style={commonStyles.textSecondary}>No courses available</Text>
-          </View>
         }
       />
     </View>
@@ -108,62 +155,197 @@ export default function HomePage() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    padding: theme.spacing.md,
-    backgroundColor: theme.colors.primary.main,
-    paddingTop: theme.spacing.xl,
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
   },
-  greeting: {
-    fontSize: theme.typography.fontSize["2xl"],
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.primary.contrast,
+  headerContainer: {
+    paddingHorizontal: theme.spacing.md,
+    paddingTop: theme.spacing.md,
   },
-  subtitle: {
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.primary.contrast,
-    opacity: 0.9,
-    marginTop: theme.spacing.xs,
-  },
-  listContent: {
-    padding: theme.spacing.md,
-  },
-  courseCard: {
-    ...commonStyles.card,
-    marginBottom: theme.spacing.md,
+  topRow: {
     flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.spacing.lg,
   },
-  courseThumbnail: {
-    width: 80,
-    height: 80,
-    backgroundColor: theme.colors.primary.light,
-    borderRadius: theme.borderRadius.md,
+  userInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  avatarPlaceholder: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: theme.colors.pastel.lavender,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: theme.spacing.md,
+    marginRight: theme.spacing.sm,
   },
-  courseThumbnailText: {
-    fontSize: 32,
+  welcomeText: {
+    fontSize: 12,
+    color: theme.colors.text.secondary,
+    fontWeight: '500',
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#000",
+  },
+  notificationBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#F3F4F6",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badge: {
+    position: 'absolute',
+    top: 10,
+    right: 12,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: theme.colors.error.main,
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  heroScroll: {
+    marginBottom: theme.spacing.lg,
+  },
+  heroCard: {
+    width: width - theme.spacing.md * 2,
+    height: 160,
+    borderRadius: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: theme.spacing.md,
+    overflow: 'hidden',
+  },
+  heroTextContainer: {
+    flex: 1,
+    zIndex: 1,
+  },
+  heroTitle: {
+    color: '#fff',
+    fontSize: 22,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  heroSubtitle: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  heroButton: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+  },
+  heroButtonText: {
+    color: '#000',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  heroImagePlaceholder: {
+    position: 'absolute',
+    right: -20,
+    bottom: -10,
+  },
+  categoriesContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: theme.spacing.xl,
+  },
+  categoryItem: {
+    alignItems: 'center',
+    width: (width - theme.spacing.md * 2) / 4,
+  },
+  categoryIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  categoryTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: theme.colors.text.primary,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.spacing.md,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#000",
+  },
+  seeAll: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.primary.main,
+  },
+  listContent: {
+    paddingBottom: 100,
+  },
+  courseCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 12,
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    marginHorizontal: theme.spacing.md,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+    ...theme.shadows.sm,
+  },
+  courseImageContainer: {
+    width: 90,
+    height: 90,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
   },
   courseInfo: {
     flex: 1,
-    justifyContent: "space-between",
+    paddingRight: 4,
   },
   courseTitle: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text.primary,
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#000",
+    marginBottom: 8,
+    lineHeight: 22,
   },
-  courseInstructor: {
-    fontSize: theme.typography.fontSize.sm,
+  courseMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  courseDate: {
+    fontSize: 12,
     color: theme.colors.text.secondary,
+    marginLeft: 4,
   },
-  coursePrice: {
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.primary.main,
+  progressBarContainer: {
+    height: 6,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 3,
+    width: '100%',
   },
-  courseRating: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text.secondary,
+  progressBar: {
+    height: '100%',
+    backgroundColor: theme.colors.primary.main,
+    borderRadius: 3,
   },
 });

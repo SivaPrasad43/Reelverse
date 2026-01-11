@@ -1,7 +1,7 @@
 import { ROUTES } from "@/shared/routes";
 import { useAppDispatch, useAppSelector } from "@/shared/store";
 import { logoutUser } from "@/shared/store/slices/authSlice";
-import { commonStyles, theme } from "@/shared/styles";
+import { theme } from "@/shared/styles";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -26,40 +27,40 @@ export default function ProfilePage() {
         text: "Logout",
         style: "destructive",
         onPress: async () => {
-            await dispatch(logoutUser());
-            router.replace(ROUTES.TABS.INDEX);
-          },
+          await dispatch(logoutUser());
+          router.replace(ROUTES.TABS.INDEX);
+        },
       },
     ]);
   };
 
   const menuItems = [
     {
-      icon: "👤",
+      icon: "person-outline",
       title: "Edit Profile",
       subtitle: "Update your personal information",
       onPress: () => Alert.alert("Coming Soon", "Edit profile feature"),
     },
     {
-      icon: "📚",
+      icon: "book-outline",
       title: "My Courses",
       subtitle: `${enrolledCourses.length} courses enrolled`,
       onPress: () => router.push(ROUTES.TABS.MY_COURSES),
     },
     {
-      icon: "📜",
+      icon: "ribbon-outline",
       title: "Certificates",
       subtitle: "View your earned certificates",
       onPress: () => Alert.alert("Coming Soon", "Certificates feature"),
     },
     {
-      icon: "⚙️",
+      icon: "settings-outline",
       title: "Settings",
-      subtitle: "App preferences and notifications",
+      subtitle: "Notifications, privacy and more",
       onPress: () => Alert.alert("Coming Soon", "Settings feature"),
     },
     {
-      icon: "❓",
+      icon: "help-circle-outline",
       title: "Help & Support",
       subtitle: "Get help or contact us",
       onPress: () => Alert.alert("Coming Soon", "Support feature"),
@@ -67,190 +68,326 @@ export default function ProfilePage() {
   ];
 
   return (
-    <View style={commonStyles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
+    <View style={styles.safeArea}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.contentContainer}
+      >
         <View style={styles.header}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {user?.name?.charAt(0).toUpperCase() || "U"}
-            </Text>
-          </View>
-          <Text style={styles.name}>{user?.name || "User"}</Text>
-          <Text style={styles.email}>{user?.email}</Text>
-        </View>
-
-        {/* Stats */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{enrolledCourses.length}</Text>
-            <Text style={styles.statLabel}>Courses</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Certificates</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Hours</Text>
-          </View>
-        </View>
-
-        {/* Menu Items */}
-        <View style={styles.menuContainer}>
-          {menuItems.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.menuItem}
-              onPress={item.onPress}
-            >
-              <View style={styles.menuIcon}>
-                <Text style={styles.menuIconText}>{item.icon}</Text>
-              </View>
-              <View style={styles.menuContent}>
-                <Text style={styles.menuTitle}>{item.title}</Text>
-                <Text style={styles.menuSubtitle}>{item.subtitle}</Text>
-              </View>
-              <Text style={styles.menuArrow}>›</Text>
+          <View style={styles.topRow}>
+            <Text style={styles.headerTitle}>Profile</Text>
+            <TouchableOpacity style={styles.notificationBtn}>
+              <Ionicons name="notifications-outline" size={24} color="#000" />
+              <View style={styles.badge} />
             </TouchableOpacity>
-          ))}
+          </View>
+
+          <View style={styles.profileSection}>
+            <View style={styles.avatarWrapper}>
+              <View style={styles.avatar}>
+                <Ionicons
+                  name="person"
+                  size={48}
+                  color={theme.colors.primary.main}
+                />
+              </View>
+              <TouchableOpacity style={styles.editButton}>
+                <Ionicons name="camera" size={16} color="#fff" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.userInfo}>
+              <Text style={styles.userName}>{user?.name || "Erica Hawkins"}</Text>
+              <Text style={styles.userEmail}>{user?.email}</Text>
+            </View>
+          </View>
+
+            <View style={styles.statsRow}>
+              <View
+                style={[
+                  styles.statBox,
+                  { backgroundColor: theme.colors.pastel.blue },
+                ]}
+              >
+                <Ionicons
+                  name="book"
+                  size={28}
+                  color={theme.colors.info.main}
+                />
+                <Text style={styles.statNumber}>{enrolledCourses.length}</Text>
+                <Text style={styles.statLabel}>Courses</Text>
+              </View>
+
+              <View
+                style={[
+                  styles.statBox,
+                  { backgroundColor: theme.colors.pastel.yellow },
+                ]}
+              >
+                <Ionicons
+                  name="time"
+                  size={28}
+                  color={theme.colors.warning.main}
+                />
+                <Text style={styles.statNumber}>148</Text>
+                <Text style={styles.statLabel}>Hours</Text>
+              </View>
+
+              <View
+                style={[
+                  styles.statBox,
+                  { backgroundColor: theme.colors.pastel.green },
+                ]}
+              >
+                <Ionicons
+                  name="ribbon"
+                  size={28}
+                  color={theme.colors.success.main}
+                />
+                <Text style={styles.statNumber}>12</Text>
+                <Text style={styles.statLabel}>Certificates</Text>
+              </View>
+            </View>
         </View>
 
-        {/* Logout Button */}
-        <TouchableOpacity style={[styles.logoutButton]} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
+        <View style={styles.menuSection}>
+          <Text style={styles.sectionTitle}>Account Settings</Text>
+          <View style={styles.menuList}>
+            {menuItems.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.menuItem,
+                  index === menuItems.length - 1 && styles.noBorder,
+                ]}
+                onPress={item.onPress}
+              >
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: theme.colors.pastel.lavender },
+                  ]}
+                >
+                  <Ionicons
+                    name={item.icon as any}
+                    size={22}
+                    color={theme.colors.primary.main}
+                  />
+                </View>
+                <View style={styles.menuText}>
+                  <Text style={styles.menuTitle}>{item.title}</Text>
+                  <Text style={styles.menuSubtitle}>{item.subtitle}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
+              </TouchableOpacity>
+            ))}
+          </View>
 
-        <Text style={styles.version}>Version 1.0.0</Text>
+          <TouchableOpacity style={styles.logoutAction} onPress={handleLogout}>
+            <View style={styles.logoutIcon}>
+              <Ionicons name="log-out-outline" size={22} color="#EF4444" />
+            </View>
+            <Text style={styles.logoutText}>Sign Out</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.versionText}>Version 1.0.2</Text>
+        </View>
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    alignItems: "center",
-    padding: theme.spacing.xl,
-    backgroundColor: theme.colors.primary.main,
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
   },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: theme.colors.primary.dark,
+  contentContainer: {
+    paddingBottom: 100,
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 20,
+    backgroundColor: "#F9FAFB",
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+  },
+  topRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#111827",
+  },
+  notificationBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
   },
-  avatarText: {
-    fontSize: 40,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.primary.contrast,
+  badge: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#EF4444",
+    borderWidth: 1.5,
+    borderColor: "#fff",
   },
-  name: {
-    fontSize: theme.typography.fontSize.xl,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.primary.contrast,
-    marginBottom: theme.spacing.xs,
-  },
-  email: {
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.primary.contrast,
-    opacity: 0.9,
-  },
-  statsContainer: {
+  profileSection: {
     flexDirection: "row",
-    backgroundColor: theme.colors.background.paper,
-    marginHorizontal: theme.spacing.md,
-    marginTop: -theme.spacing.lg,
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.lg,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  statItem: {
-    flex: 1,
     alignItems: "center",
+    marginBottom: 20,
   },
-  statValue: {
-    fontSize: theme.typography.fontSize["2xl"],
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.primary.main,
+  avatarWrapper: {
+    position: "relative",
+    marginRight: 20,
   },
-  statLabel: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text.secondary,
-    marginTop: theme.spacing.xs,
+  avatar: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
   },
-  statDivider: {
-    width: 1,
-    backgroundColor: theme.colors.border,
+  editButton: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: theme.colors.primary.main,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
   },
-  menuContainer: {
-    marginTop: theme.spacing.lg,
-    paddingHorizontal: theme.spacing.md,
+  userInfo: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#111827",
+    marginBottom: 4,
+  },
+  userEmail: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "500",
+  },
+    statsRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    },
+    statBox: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+  },
+    statNumber: {
+      fontSize: 18,
+      fontWeight: "800",
+      color: "#111827",
+      marginTop: 8,
+      marginBottom: 2,
+    },
+    statLabel: {
+      fontSize: 10,
+      color: "#6B7280",
+      fontWeight: "700",
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+  menuSection: {
+    paddingHorizontal: 20,
+    marginTop: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#111827",
+    marginBottom: 16,
+    marginLeft: 4,
+  },
+  menuList: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+    overflow: "hidden",
+    marginBottom: 24,
   },
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: theme.colors.background.paper,
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
   },
-  menuIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: theme.borderRadius.md,
-    backgroundColor: theme.colors.primary.light,
+  noBorder: {
+    borderBottomWidth: 0,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: theme.spacing.md,
+    marginRight: 16,
   },
-  menuIconText: {
-    fontSize: 24,
-  },
-  menuContent: {
+  menuText: {
     flex: 1,
   },
   menuTitle: {
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text.primary,
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 2,
   },
   menuSubtitle: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text.secondary,
-    marginTop: theme.spacing.xs,
+    fontSize: 13,
+    color: "#6B7280",
   },
-  menuArrow: {
-    fontSize: 24,
-    color: theme.colors.text.secondary,
-  },
-  logoutButton: {
-    marginHorizontal: theme.spacing.md,
-    marginTop: theme.spacing.lg,
-    padding: theme.spacing.md,
-    borderRadius: theme.borderRadius.lg,
-    borderWidth: 2,
-    borderColor: theme.colors.error,
+  logoutAction: {
+    flexDirection: "row",
     alignItems: "center",
+    padding: 18,
+    borderRadius: 12,
+    backgroundColor: "#FEF2F2",
+    justifyContent: "center",
+    marginBottom: 24,
   },
-  logoutButtonText: {
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.error,
+  logoutIcon: {
+    marginRight: 10,
   },
-  version: {
+  logoutText: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#EF4444",
+  },
+  versionText: {
     textAlign: "center",
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text.secondary,
-    marginTop: theme.spacing.lg,
-    marginBottom: theme.spacing.xl,
+    fontSize: 13,
+    color: "#9CA3AF",
+    fontWeight: "500",
   },
 });

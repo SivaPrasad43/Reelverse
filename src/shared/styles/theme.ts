@@ -54,11 +54,20 @@ export const theme = {
       light: "#60A5FA",
       dark: "#2563EB",
     },
-    // Borders
-    border: "#E5E7EB",
-    borderLight: "#F3F4F6",
-    borderDark: "#D1D5DB",
-  },
+      // Borders
+      border: "#E5E7EB",
+      borderLight: "#F3F4F6",
+      borderDark: "#D1D5DB",
+      // Education App Pastel Colors
+      pastel: {
+        lavender: "#E0E7FF",
+        blue: "#DBEAFE",
+        green: "#D1FAE5",
+        yellow: "#FEF3C7",
+        pink: "#FCE7F3",
+        purple: "#F3E8FF",
+      }
+    },
 
   // Dark mode colors
   darkColors: {
@@ -118,10 +127,11 @@ export const theme = {
   // Typography
   typography: {
     fontFamily: {
-      regular: "System",
-      medium: "System",
-      semiBold: "System",
-      bold: "System",
+      regular: "Manrope_400Regular",
+      medium: "Manrope_500Medium",
+      semiBold: "Manrope_600SemiBold",
+      bold: "Manrope_700Bold",
+      extraBold: "Manrope_800ExtraBold",
     },
     fontSize: {
       xs: 12,

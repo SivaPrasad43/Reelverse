@@ -9,6 +9,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  hasLaunched: boolean;
 }
 
 const initialState: AuthState = {
@@ -17,6 +18,7 @@ const initialState: AuthState = {
   isAuthenticated: false,
   isLoading: false,
   error: null,
+  hasLaunched: false,
 };
 
 // Async thunks
@@ -89,6 +91,9 @@ const authSlice = createSlice({
     setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
       state.isAuthenticated = true;
+    },
+    setHasLaunched: (state) => {
+      state.hasLaunched = true;
     },
     clearError: (state) => {
       state.error = null;
@@ -166,5 +171,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, clearError } = authSlice.actions;
+export const { setUser, clearError, setHasLaunched } = authSlice.actions;
 export default authSlice.reducer;

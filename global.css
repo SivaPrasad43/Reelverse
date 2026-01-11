@@ -1,3 +1,26 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Define theme colors for autofill */
+:root {
+  --autofill-bg: #FFFFFF;
+  --autofill-text: #111827;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --autofill-bg: #1F2937;
+    --autofill-text: #F9FAFB;
+  }
+}
+
+/* Fix for yellow highlight in input boxes when autofilled */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--autofill-bg) inset !important;
+    -webkit-text-fill-color: var(--autofill-text) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}

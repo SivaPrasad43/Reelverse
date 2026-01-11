@@ -13,7 +13,10 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image,
+  TextInput,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function MyCoursesScreen() {
   const router = useRouter();
@@ -22,9 +25,10 @@ export default function MyCoursesScreen() {
   const { enrolledCourses, isLoading } = useAppSelector(
     (state) => state.courses
   );
-  const [refreshing, setRefreshing] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
+    useEffect(() => {
     if (user) {
       dispatch(fetchEnrolledCourses(user.id));
     }
@@ -38,25 +42,82 @@ export default function MyCoursesScreen() {
     }
   };
 
+  const renderHeader = () => (
+    <View style={styles.headerContainer}>
+        <View style={styles.topRow}>
+          <Text style={styles.headerTitle}>My Courses</Text>
+          <TouchableOpacity style={styles.notificationBtn}>
+            <Ionicons name="notifications-outline" size={24} color="#000" />
+            <View style={styles.badge} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.searchBar}>
+          <Ionicons
+            name="search-outline"
+            size={20}
+            color={theme.colors.text.secondary}
+          />
+            <TextInput
+              placeholder="Search your courses"
+              style={styles.searchInput}
+              placeholderTextColor={theme.colors.text.secondary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              returnKeyType="search"
+              onSubmitEditing={() => {}}
+            />
+        </View>
+
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Ongoing Courses</Text>
+        </View>
+    </View>
+  );
+
   const renderCourseCard = ({ item }: { item: Course }) => (
     <TouchableOpacity
       style={styles.courseCard}
       onPress={() => router.push(ROUTES.COURSE(item.id) as any)}
     >
-      <View style={styles.courseThumbnail}>
-        <Text style={styles.courseThumbnailText}>📚</Text>
+      <View style={[styles.courseImageContainer, { backgroundColor: theme.colors.pastel.mint }]}>
+        {item.thumbnail_url ? (
+          <Image
+            source={{ uri: item.thumbnail_url }}
+            style={styles.courseThumbnail}
+          />
+        ) : (
+          <Ionicons
+            name="play-circle"
+            size={40}
+            color={theme.colors.primary.main}
+          />
+        )}
       </View>
       <View style={styles.courseInfo}>
-        <Text style={styles.courseTitle}>{item.title}</Text>
-        <Text style={styles.courseInstructor}>{item.instructor}</Text>
-        <View style={styles.progressContainer}>
+        <Text style={styles.courseTitle} numberOfLines={2}>
+          {item.title}
+        </Text>
+        <View style={styles.courseMeta}>
+            <Text style={styles.courseInstructor}>{item.instructor}</Text>
+            <View style={styles.dot} />
+            <Text style={styles.lessonCount}>12 Lessons</Text>
+        </View>
+        <View style={styles.progressRow}>
           <View style={styles.progressBar}>
             <View
-              style={[styles.progressFill, { width: `${item.progress || 0}%` }]}
+              style={[styles.progressFill, { width: `${item.progress || 35}%` }]}
             />
           </View>
-          <Text style={styles.progressText}>{item.progress || 0}%</Text>
+          <Text style={styles.progressText}>{item.progress || 35}%</Text>
         </View>
+      </View>
+      <View style={styles.arrowContainer}>
+        <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={theme.colors.text.secondary}
+        />
       </View>
     </TouchableOpacity>
   );
@@ -64,148 +125,231 @@ export default function MyCoursesScreen() {
   if (isLoading && !refreshing) {
     return (
       <View style={commonStyles.containerCentered}>
-        <ActivityIndicator size="large" color={theme.colors.primary.main} />
+        <ActivityIndicator size="large" color="#000000" />
       </View>
     );
   }
 
-  return (
-    <View style={commonStyles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Courses</Text>
-        <Text style={styles.headerSubtitle}>
-          {enrolledCourses.length} courses enrolled
-        </Text>
-      </View>
+  const filteredCourses = enrolledCourses.filter((course) =>
+    course.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
+  return (
+    <View style={styles.safeArea}>
       <FlatList
-        data={enrolledCourses}
+        data={filteredCourses}
         renderItem={renderCourseCard}
         keyExtractor={(item) => item.id}
+        ListHeaderComponent={renderHeader()}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         ListEmptyComponent={
-          <View style={commonStyles.containerCentered}>
-            <Text style={styles.emptyIcon}>📚</Text>
-            <Text style={styles.emptyTitle}>No courses yet</Text>
+          <View style={styles.emptyContainer}>
+            <Ionicons
+              name="book-outline"
+              size={64}
+              color={theme.colors.text.secondary}
+            />
+            <Text style={styles.emptyTitle}>No enrolled courses</Text>
             <Text style={styles.emptyText}>
-              Explore courses and start learning
+              You haven't enrolled in any courses yet. Start your learning
+              journey today!
             </Text>
             <TouchableOpacity
-              style={[commonStyles.button, commonStyles.buttonPrimary]}
-              onPress={() => router.push(ROUTES.TABS.INDEX)}
+              style={styles.exploreButton}
+              onPress={() => router.push("/explore")}
             >
-              <Text style={styles.exploreButtonText}>Explore Courses</Text>
+              <Text style={styles.exploreButtonText}>Explore Now</Text>
             </TouchableOpacity>
           </View>
-        }
-      />
-    </View>
-  );
-}
+          }
+        />
+      </View>
+    );
+  }
 
 const styles = StyleSheet.create({
-  header: {
-    padding: theme.spacing.md,
-    backgroundColor: theme.colors.primary.main,
-    paddingTop: theme.spacing.xl,
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  headerContainer: {
+    paddingHorizontal: theme.spacing.md,
+    paddingTop: theme.spacing.md,
+  },
+  topRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.spacing.xl,
   },
   headerTitle: {
-    fontSize: theme.typography.fontSize["2xl"],
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.primary.contrast,
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#000",
   },
-  headerSubtitle: {
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.primary.contrast,
-    opacity: 0.9,
-    marginTop: theme.spacing.xs,
+  notificationBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#F3F4F6",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badge: {
+    position: 'absolute',
+    top: 10,
+    right: 12,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: theme.colors.error.main,
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F3F4F6",
+    paddingHorizontal: theme.spacing.md,
+    height: 52,
+    borderRadius: 16,
+    marginBottom: theme.spacing.xl,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: theme.spacing.sm,
+    fontSize: 16,
+    color: "#000",
+    fontWeight: '500',
+  },
+  sectionHeader: {
+    marginBottom: theme.spacing.md,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#000",
   },
   listContent: {
-    padding: theme.spacing.md,
+    paddingBottom: 100,
   },
   courseCard: {
     flexDirection: "row",
-    backgroundColor: theme.colors.background.paper,
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    alignItems: "center",
+    padding: 12,
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    marginHorizontal: theme.spacing.md,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+    ...theme.shadows.sm,
   },
-  courseThumbnail: {
-    width: 80,
-    height: 80,
-    backgroundColor: theme.colors.primary.light,
-    borderRadius: theme.borderRadius.md,
+  courseImageContainer: {
+    width: 90,
+    height: 90,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: theme.spacing.md,
+    marginRight: 16,
+    overflow: "hidden",
   },
-  courseThumbnailText: {
-    fontSize: 40,
+  courseThumbnail: {
+    width: "100%",
+    height: "100%",
   },
   courseInfo: {
     flex: 1,
-    justifyContent: "space-between",
   },
   courseTitle: {
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text.primary,
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#000",
+    marginBottom: 6,
+    lineHeight: 22,
+  },
+  courseMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   courseInstructor: {
-    fontSize: theme.typography.fontSize.sm,
+    fontSize: 13,
     color: theme.colors.text.secondary,
-    marginTop: theme.spacing.xs,
+    fontWeight: '500',
   },
-  progressContainer: {
+  dot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#D1D5DB',
+    marginHorizontal: 8,
+  },
+  lessonCount: {
+    fontSize: 13,
+    color: theme.colors.text.secondary,
+    fontWeight: '500',
+  },
+  progressRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: theme.spacing.sm,
+    gap: 8,
   },
   progressBar: {
     flex: 1,
-    height: 8,
-    backgroundColor: theme.colors.border,
-    borderRadius: theme.borderRadius.sm,
-    marginRight: theme.spacing.sm,
+    height: 6,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 3,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    backgroundColor: theme.colors.success,
-    borderRadius: theme.borderRadius.sm,
+    backgroundColor: theme.colors.primary.main,
+    borderRadius: 3,
   },
   progressText: {
-    fontSize: theme.typography.fontSize.xs,
-    color: theme.colors.text.secondary,
-    fontWeight: theme.typography.fontWeight.semibold,
+    fontSize: 12,
+    fontWeight: "700",
+    color: theme.colors.primary.main,
   },
-  emptyIcon: {
-    fontSize: 80,
-    marginBottom: theme.spacing.md,
+  arrowContainer: {
+    marginLeft: 8,
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 40,
   },
   emptyTitle: {
-    fontSize: theme.typography.fontSize.xl,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing.sm,
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#000",
+    marginTop: 16,
+    marginBottom: 8,
   },
   emptyText: {
-    fontSize: theme.typography.fontSize.base,
+    fontSize: 15,
     color: theme.colors.text.secondary,
     textAlign: "center",
-    marginBottom: theme.spacing.lg,
+    lineHeight: 22,
+    marginBottom: 32,
+  },
+  exploreButton: {
+    backgroundColor: theme.colors.primary.main,
+    paddingHorizontal: 40,
+    paddingVertical: 16,
+    borderRadius: 16,
+    ...theme.shadows.md,
   },
   exploreButtonText: {
-    color: theme.colors.primary.contrast,
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.semibold,
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
   },
 });
+

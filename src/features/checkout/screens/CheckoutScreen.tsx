@@ -3,7 +3,7 @@ import { useAppSelector } from "@/shared/store";
 import { courses } from "@/shared/api/endpoints";
 import { commonStyles, theme } from "@/shared/styles";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import {
   Alert,
   FlatList,
@@ -11,23 +11,11 @@ import {
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator,
-  Image,
-} from "react-native";
+    ActivityIndicator,
+    Image,
+  } from "react-native";
 import { supabase } from "@/shared/api/supabase";
-
-interface Course {
-  id: string;
-  title: string;
-  description: string;
-  instructor: string;
-  duration: string;
-  level: string;
-  rating: number;
-  price: number;
-  thumbnail_url?: string;
-  category: string;
-}
+import { IconSymbol } from "@/components/IconSymbol";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -38,7 +26,29 @@ export default function CheckoutPage() {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   
   // Parse course IDs from URL params
-  const courseIdsArray = typeof courseIds === 'string' ? courseIds.split(',') : [];
+  const courseIdsArray = useMemo(() => {
+    if (typeof courseIds === 'string') {
+      return courseIds.split(',').filter(id => !!id);
+    }
+    return [];
+  }, [courseIds]);
+
+  const loadSelectedCourses = useCallback(async () => {
+    if (courseIdsArray.length === 0) return;
+    
+    try {
+      setLoading(true);
+      const coursePromises = courseIdsArray.map(id => courses.getById(id));
+      const loadedCourses = await Promise.all(coursePromises);
+      setSelectedCourses(loadedCourses);
+    } catch (error) {
+      console.error("Error loading selected courses:", error);
+      Alert.alert("Error", "Failed to load selected courses. Please try again.");
+      router.replace(ROUTES.TABS.EXPLORE);
+    } finally {
+      setLoading(false);
+    }
+  }, [courseIdsArray, router]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -59,22 +69,7 @@ export default function CheckoutPage() {
       // If no courses selected, redirect back to explore
       router.replace(ROUTES.TABS.EXPLORE);
     }
-  }, [isAuthenticated, courseIdsArray, router]);
-
-  const loadSelectedCourses = async () => {
-    try {
-      setLoading(true);
-      const coursePromises = courseIdsArray.map(id => courses.getById(id));
-      const loadedCourses = await Promise.all(coursePromises);
-      setSelectedCourses(loadedCourses);
-    } catch (error) {
-      console.error("Error loading selected courses:", error);
-        Alert.alert("Error", "Failed to load selected courses. Please try again.");
-        router.replace(ROUTES.TABS.EXPLORE);
-      } finally {
-      setLoading(false);
-    }
-  };
+  }, [isAuthenticated, courseIdsArray, loadSelectedCourses, router]);
 
   const getTotalPrice = () => {
     return selectedCourses.reduce((total, course) => total + course.price, 0);
@@ -134,8 +129,8 @@ export default function CheckoutPage() {
 
   if (loading) {
     return (
-      <View style={[commonStyles.container, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color={theme.colors.primary.main} />
+      <View style={[commonStyles.container, styles.loadingContainer, { backgroundColor: "#FFFFFF" }]}>
+        <ActivityIndicator size="large" color="#000000" />
         <Text style={styles.loadingText}>Loading your selection...</Text>
       </View>
     );
@@ -144,6 +139,17 @@ export default function CheckoutPage() {
   return (
     <View style={[commonStyles.container, styles.container]}>
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <IconSymbol
+            name="chevron.left"
+            size={24}
+            color={theme.colors.text.primary}
+          />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
         <Text style={styles.title}>Checkout</Text>
         <Text style={styles.subtitle}>Review your course selection</Text>
       </View>
@@ -196,6 +202,17 @@ const styles = StyleSheet.create({
     padding: theme.spacing.lg,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: theme.spacing.md,
+    marginLeft: -theme.spacing.xs,
+  },
+  backText: {
+    fontSize: theme.typography.fontSize.base,
+    color: theme.colors.text.primary,
+    marginLeft: theme.spacing.xs,
   },
   title: {
     fontSize: theme.typography.fontSize["2xl"],
